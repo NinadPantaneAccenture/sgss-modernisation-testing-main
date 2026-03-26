@@ -1,0 +1,161 @@
+name: E2E - File Upload
+
+on:
+  workflow_dispatch:
+     inputs:
+      target_env:
+        description: "Select environment"
+        required: true
+        type: environment
+      headless:
+        description: "Run headless?"
+        required: false
+        type: boolean
+        default: false
+      tags:
+        description: "Optional: Behave tags (e.g., @smoke)"
+        required: false
+        type: string
+
+jobs:
+  e2e-file-upload-tests:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_env }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-v3
+        restore-keys: |
+          ${{ runner.os }}-pip-v3-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Playwright browsers
+      run: |
+        python -m playwright install --with-deps
+
+    - name: Create reports directory
+      run: mkdir -p reports/screenshots
+
+    - name: Install Xvfb
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
+    - name: Resolve environment file
+      run: |
+        if [ "${{ inputs.target_env }}" = "DEV" ]; then
+          echo "DOTENV_PATH=${GITHUB_WORKSPACE}/envDEV" >> $GITHUB_ENV
+        elif [ "${{ inputs.target_env }}" = "SIT" ]; then
+          echo "DOTENV_PATH=${GITHUB_WORKSPACE}/envSIT" >> $GITHUB_ENV
+        else
+          echo "❌ Unknown environment selected"
+          exit 1
+        fi
+
+    - name: Debug env loading
+      run: |
+        echo "Selected ENV: ${{ inputs.target_env }}"
+        echo "DOTENV_PATH: $DOTENV_PATH"
+
+    - name: Run Behave tests
+      shell: bash
+      env:
+        HEADLESS: "false"
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: eu-west-2
+        BASE_URL: ${{ secrets.BASE_URL }}
+      run: |
+        TAGS="${{ inputs.tags }}"
+        TAG_OPT=""
+        if [ -n "$TAGS" ]; then
+          TAG_OPT="--tags=$TAGS"
+          echo "✅ Running with tag filter: $TAG_OPT"
+        else
+          echo "ℹ️ No tag filter provided, running full feature."
+        fi
+
+        xvfb-run -a --server-args="-screen 0 1920x1080x24" \
+          python -m behave tests/functional/features/e2e/e2e_FileUpload.feature \
+          $TAG_OPT \
+          --format=behave_html_formatter:HTMLFormatter \
+          --outfile=reports/TestExecutionReport.html \
+          --junit \
+          --junit-directory=reports
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ github.run_number }}
+        path: |
+          reports/
+          tests/functional/mocking_services/auth_state.json
+
+        
+    - name: Test Summary
+      if: always()
+      shell: bash
+      run: |
+        {
+          echo "<h2>🧪 E2E Test Execution Summary</h2>"
+
+          python << 'EOF'
+        import xml.etree.ElementTree as ET
+        import os
+
+        xml_file = "reports/TESTS-features.e2e.e2e_FileUpload.xml"
+
+        if not os.path.exists(xml_file):
+            print("<p>❌ Test result XML not found</p>")
+            exit(0)
+
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+
+        tests = root.attrib.get("tests", "0")
+        failures = root.attrib.get("failures", "0")
+        errors = root.attrib.get("errors", "0")
+        skipped = root.attrib.get("skipped", "0")
+        time_taken = root.attrib.get("time", "0")
+
+        print(f"""
+        <table>
+          <tr><th>Metric</th><th>Count</th></tr>
+          <tr><td>Total Tests</td><td>{tests}</td></tr>
+          <tr><td>Failures</td><td style="color:red">{failures}</td></tr>
+          <tr><td>Errors</td><td style="color:orange">{errors}</td></tr>
+          <tr><td>Skipped</td><td>{skipped}</td></tr>
+          <tr><td>Time (s)</td><td>{time_taken}</td></tr>
+        </table>
+        """)
+
+        print("<h3>❌ Failed / Errored Tests</h3>")
+        print("<table><tr><th>Test Case</th><th>Message</th></tr>")
+
+        for tc in root.findall("testcase"):
+            failure = tc.find("failure")
+            error = tc.find("error")
+            if failure is not None or error is not None:
+                msg = (failure or error).attrib.get("message", "N/A")
+                print(f"<tr><td>{tc.attrib.get('name')}</td><td>{msg[:300]}</td></tr>")
+
+        print("</table>")
+        EOF
+
+              echo "<p>📥 Full HTML report is available under workflow Artifacts.</p>"
+              echo "<p>🔗 <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>Open workflow → Artifacts</a></p>"
+            } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,65 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+
+# Python
+.python-version
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environments
+.venv
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+.envDEV
+.envDEV_Local
+.envSIT
+.envSIT_Local
+.envPROD
+.env.PREPROD
+.env.local
+.env.*.local
+.env.*.development
+
+# AWS credentials file (if using local AWS credentials)
+aws_credentials.json
+aws_config_local.py
+
+# Test artifacts
+reports/
+screenshots/
+output/
+plain.output
+output/report.json
+output/report.html
+
+# Web UI artifacts
+WebUiRun.html
+test_file_mappingOG.json
+
+
+# Compressed files
+*.html
+*.zip
+*.tar.gz
+
+# OS files
+.DS_Store
+Thumbs.db

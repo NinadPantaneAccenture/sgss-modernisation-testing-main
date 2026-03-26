@@ -1,0 +1,125 @@
+LABORATORY REPORT LINE DELIMIT
+(*CDR_REPORT
+EPC
+SourceLabPass
+
+EpcTestPat
+03/01/2026
+Pat
+
+123456789
+01/01/2020
+
+
+M
+TestAddress
+EC1A 1AA
+
+
+BacSourcePass
+Y
+01.01.26
+Y
+ROPass
+Y
+TestTravel
+Y
+LOTS OF PATIENTS
+N
+VaccStatPass
+HEALTH INDUSTRY
+EthnicPass
+GPPass
+HosConPass
+TestAltAddress
+N
+NOT FEELNG VERY WELL
+MedSpecPass
+
+TestWard
+(*ORGANISMS
+OrganismPass
+ORGANISMS*)
+(*ANTIBIOTICS
+AntiPass S
+ANTIBIOTICS*)
+(*TESTS
+TransPass
+SpecTypePass
+TestMethPass
+ROTypePass
+02/01/2026
+TESTS*)
+(*FEATURES
+FeatPass
+N
+Feature notes are put here
+FEATURES*)
+(*NOTES
+Patient notes are put here
+More notes are put here
+And more notes are put here
+NOTES*)
+CDR_REPORT*)
+(*CDR_REPORT
+EPC
+SourceLabFail
+
+EpcTestPat
+03/01/2026
+Pat
+EpcTest
+123456789
+01/01/2020
+
+
+M
+TestAddress
+EC1A 1AA
+
+
+BacSourceFail
+Y
+01.01.26
+Y
+ROFail
+Y
+TestTravel
+Y
+LOTS OF PATIENTS
+N
+VaccStatFail
+HEALTH INDUSTRY
+EthnicFail
+GPFail
+HosConFail
+TestAltAddress
+N
+NOT FEELNG VERY WELL
+MedSpecFail
+
+TestWard
+(*ORGANISMS
+OrganismFail
+ORGANISMS*)
+(*ANTIBIOTICS
+AntiFail S
+ANTIBIOTICS*)
+(*TESTS
+TransFail
+SpecTypeFail
+TestMethFail
+ROTypeFail
+02/01/2026
+TESTS*)
+(*FEATURES
+FeatFail
+N
+Feature notes are put here
+FEATURES*)
+(*NOTES
+Patient notes are put here
+More notes are put here
+And more notes are put here
+NOTES*)
+CDR_REPORT*)

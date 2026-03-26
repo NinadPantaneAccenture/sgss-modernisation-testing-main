@@ -1,0 +1,23 @@
+# =====================================================
+# S3 Configuration
+# =====================================================
+AWS_REGION = "eu-west-2"
+S3_BUCKET_NAME=sgss-data
+S3_INPUT_PREFIX=PreRegFileSrcWeb/
+
+# =====================================================
+# Glue Job Configuration
+# =====================================================
+GLUE_JOB_NAME=WF_Load_CDR_Files_to_ODS
+GLUE_CLEAN_JOB_NAME=sgss_ddl
+GLUE_JOB_TIMEOUT=600
+GLUE_POLL_INTERVAL=10
+
+# =====================================================
+# Aurora / Secrets Manager Configuration
+# =====================================================
+AURORA_SECRET_NAME=arn:aws:secretsmanager:eu-west-2:055029754137:secret:test/Aurora/PostgreSQL
+AURORA_DATABASE=testdb
+AURORA_TABLE_NAME=ods.omd_file_log
+AURORA_PORT=5432
+AURORA_RESOURCE_ARN=arn:aws:rds:eu-west-2:055029754137:cluster:test-postgresql

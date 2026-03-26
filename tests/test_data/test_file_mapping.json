@@ -1,0 +1,46 @@
+{
+  "base_path": "tests/test_data/",
+  "files": {
+    "valid CDR-LIMS": "cdr/cdr-lims/valid/yyycdr2026020514291000000001.txt",
+    "regex error CDR-LIMS": "cdr/cdr-lims/invalid/filename_check/yyycdr202602051429100000002.txt",
+    "incorrect lab code CDR-LIMS": "cdr/cdr-lims/invalid/filename_check/abccdr2026020514291000000001.txt",
+    "unpopulated columns CDR-LIMS": "cdr/cdr-lims/invalid/column_check/yyycdr2026020514291000000004.txt",
+    "invalid data CDR-LIMS": "cdr/cdr-lims/invalid/column_check/yyycdr2026020514291000000003.txt",
+
+    "valid CDR-CSV": "cdr/cdr-csv/valid/yyycdr2024100108010100000001.csv",
+    "regex error CDR-CSV": "cdr/cdr-csv/invalid/workflow_check/yyyacdr2024100108010100000001.csv",
+    "incorrect lab code CDR-CSV": "cdr/cdr-csv/invalid/workflow_check/abccdr2024100108010100000001.csv",
+    "unpopulated columns CDR-CSV": "cdr/cdr-csv/invalid/pop_flag_check/yyycdr2024100108010100000003.csv",
+    "invalid data CDR-CSV": "cdr/cdr-csv/invalid/valid_flag_check/yyycdr2024100108010100000002.csv",
+
+    "valid CDR-FVE": "cdr/cdr-fve/valid/SALYYYA.FVE",
+    "regex error CDR-FVE": "cdr/cdr-fve/invalid/workflow_check/SALYYYAA.FVE",
+    "incorrect lab code CDR-FVE": "cdr/cdr-fve/invalid/workflow_check/SALXEPA.FVE",
+
+    "valid CDR-XLS": "cdr/cdr-xls/valid/yyycdr.xlsx",
+    "regex error CDR-XLS": "cdr/cdr-xls/invalid/workflow_check/yyyacdr.xlsx",
+    "incorrect lab code CDR-XLS": "cdr/cdr-xls/invalid/workflow_check/abccdr.xlsx",
+
+
+    "valid AMR-LIMS": "amr/amr-lims/valid/yyyamr2026010606042600000004.txt",
+    "regex error AMR-LIMS": "amr/amr-lims/invalid/workflow_check/yyyamr202601060604260000004.txt",
+    "incorrect lab code AMR-LIMS": "amr/amr-lims/invalid/workflow_check/abcamr2026010606042600000004.txt",
+    "unpopulated columns AMR-LIMS": "amr/amr-lims/invalid/pop_flag_check/yyyamr2026010606042600000007.txt",
+    "invalid data AMR-LIMS": "amr/amr-lims/invalid/valid_flag_check/yyyamr2026010606042600000008.txt",
+
+    "valid AMR-XLS": "amr/amr-xls/valid/yyyamr.xlsx",
+    "regex error AMR-XLS": "amr/amr-xls/invalid/workflow_check/yyyaamr.xlsx",
+    "incorrect lab code AMR-XLS": "amr/amr-xls/invalid/workflow_check/abcamr.xlsx",
+
+    "valid AMR-FVE": "amr/amr-fve/valid/YYY_NOVA14.FVE",
+    "regex error AMR-FVE": "amr/amr-fve/invalid/workflow_check/YYY_NOVVA14.FVE",
+    "incorrect lab code AMR-FVE": "amr/amr-fve/invalid/workflow_check/RXI_NOVA14.FVE",
+
+
+    "empty cdr": "cdr/web_invalid_records/yyycdr2013052015302500000012.txt",
+    "oversized cdr": "cdr/web_invalid_records/yyycdr2013052015302500000013.txt",
+    "invalid file type": "cdr/web_invalid_records/yyycdr2013052015302500000014.docx",
+    "incorrect lab code": "cdr/web_invalid_records/abccdr2013052015302500000015.txt",
+    "unauthorised lab code": "cdr/web_invalid_records/covcdr2013052015302500000016.txt"
+  }
+}

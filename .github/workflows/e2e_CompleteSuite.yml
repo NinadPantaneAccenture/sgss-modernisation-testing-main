@@ -1,0 +1,160 @@
+name: E2E - Complete Suite
+
+on:
+  workflow_dispatch:
+     inputs:
+      target_env:
+        description: "Select environment"
+        required: true
+        type: environment
+      headless:
+        description: "Run headless?"
+        required: false
+        type: boolean
+        default: false
+      tags:
+        description: "Optional: Behave tags (e.g., @smoke)"
+        required: false
+        type: string
+
+jobs:
+  e2e-complete-suite-tests:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_env }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-v3
+        restore-keys: |
+          ${{ runner.os }}-pip-v3-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Playwright browsers
+      run: |
+        python -m playwright install --with-deps
+
+    - name: Create reports directory
+      run: mkdir -p reports/screenshots
+
+    - name: Install Xvfb
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
+    - name: Resolve environment file
+      run: |
+        if [ "${{ inputs.target_env }}" = "DEV" ]; then
+          echo "DOTENV_PATH=${GITHUB_WORKSPACE}/envDEV" >> $GITHUB_ENV
+        elif [ "${{ inputs.target_env }}" = "SIT" ]; then
+          echo "DOTENV_PATH=${GITHUB_WORKSPACE}/envSIT" >> $GITHUB_ENV
+        else
+          echo "❌ Unknown environment selected"
+          exit 1
+        fi
+
+    - name: Debug env loading
+      run: |
+        echo "Selected ENV: ${{ inputs.target_env }}"
+        echo "DOTENV_PATH: $DOTENV_PATH"
+
+    - name: Run Behave tests
+      shell: bash
+      env:
+        HEADLESS: "false"
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: eu-west-2
+        BASE_URL: ${{ secrets.BASE_URL }}
+      run: |
+        TAGS="${{ inputs.tags }}"
+        TAG_OPT=""
+        if [ -n "$TAGS" ]; then
+          TAG_OPT="--tags=$TAGS"
+          echo "✅ Running with tag filter: $TAG_OPT"
+        else
+          echo "ℹ️ No tag filter provided, running full feature."
+        fi
+
+        xvfb-run -a --server-args="-screen 0 1920x1080x24" \
+          python -m behave tests/functional/features/e2e/ \
+          $TAG_OPT \
+          --format=behave_html_formatter:HTMLFormatter \
+          --outfile=reports/TestExecutionReport.html \
+          --junit \
+          --junit-directory=reports
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ github.run_number }}
+        path: |
+          reports/
+          tests/functional/mocking_services/auth_state.json
+
+            - name: Test Summary
+            if: always()
+            shell: bash
+            run: |
+              {
+                echo "<h2>🧪 E2E Complete Suite Summary</h2>"
+                echo "<p><b>Environment:</b> ${{ inputs.target_env }}</p>"
+                echo "<p><b>Tags:</b> ${{ inputs.tags || 'ALL' }}</p>"
+
+                python << 'EOF'
+          import xml.etree.ElementTree as ET
+          import glob
+          import os
+
+          xml_files = glob.glob("reports/TESTS-*.xml")
+
+          if not xml_files:
+              print("<p>❌ No JUnit XML files found</p>")
+              exit(0)
+
+          total_tests = 0
+          total_failures = 0
+          total_errors = 0
+          total_skipped = 0
+          total_time = 0.0
+
+          for xml_file in xml_files:
+              tree = ET.parse(xml_file)
+              root = tree.getroot()
+
+              total_tests += int(root.attrib.get("tests", 0))
+              total_failures += int(root.attrib.get("failures", 0))
+              total_errors += int(root.attrib.get("errors", 0))
+              total_skipped += int(root.attrib.get("skipped", 0))
+              total_time += float(root.attrib.get("time", 0))
+
+          print(f"""
+          <table>
+          <tr><th>Metric</th><th>Count</th></tr>
+          <tr><td>Total Tests</td><td>{total_tests}</td></tr>
+          <tr><td>Failures</td><td style="color:red">{total_failures}</td></tr>
+          <tr><td>Errors</td><td style="color:orange">{total_errors}</td></tr>
+          <tr><td>Skipped</td><td>{total_skipped}</td></tr>
+          <tr><td>Time (s)</td><td>{total_time:.2f}</td></tr>
+          </table>
+          """)
+          EOF
+
+                echo "<p>📥 Full HTML report available in workflow artifacts.</p>"
+                echo "<p>🔗 <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>Open workflow → Artifacts</a></p>"
+              } >> "$GITHUB_STEP_SUMMARY"
+
+
